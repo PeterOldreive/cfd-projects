@@ -13,3 +13,11 @@ y = 1:1:Ny; % y-grid, delta-y
 [X, Y] = meshgrid(x, y); % Create a 2D grid
 
 plot(X, Y, 'ko', 'MarkerFaceColor', 'r'); % Plot with trd points
+grid on; % showgridlines on plot
+
+U = randn(length(y), length(x)); % Creates a random normal dist. 
+
+% % % Plot the 3D Field
+
+figure;
+contourf(X, Y, U, 40);
