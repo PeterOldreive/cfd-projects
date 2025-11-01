@@ -36,6 +36,45 @@ Ntot = Nx*Ny; % Total number of points
 
 % Display discretized points to user
 fprintf(['For deltax = ', num2str(deltax), ' mm and deltay = ', num2str(deltay), ...
-    ' mm\nNx = ', num2str(Nx), ' and Ny = ', num2str(Ny), '\nNtot = ', num2str(Ntot)])
+    ' mm\nNx = ', num2str(Nx), ' and Ny = ', num2str(Ny), '\nNtot = ', num2str(Ntot), '\n'])
 
-%% 
+%% Define matrix and vectors
+
+A = zeros(Ntot, Ntot); % Matrix of coefficents
+T = zeros(1, Ntot); % Vector of unknowns 
+B = zeros(Ntot, 1); % Vector of knowns
+
+%% Fill matrix of coefficents and vector of knowns
+
+for j = 1:Ny % For all y points
+    for i = 1:Nx % For all x points 
+         % Define coefficents based on discretized equations
+         % Corner points
+         if(i==1 && j==1) % Bottom left corner
+            A(j,i) = 1; 
+            A(j,i+1) = -1/2;
+            A(j+1, i) = -1/2;
+        elseif(i == Nx && j == 1) % Bottom right corner
+            A(j,i) = 1; 
+            A(j,i-1) = -1/4;
+            A(j+1,i) = -1/4;
+            B(j) = 1100/4; 
+        elseif(i == 1 && j == Ny) % top left corner
+            A(j,i) = 1; 
+            A(j,i+1) = -1/3;
+            A(j-1, i) = -1/3;
+            B(j) = 400/3; 
+         elseif(i == Nx && j == Ny) % top right corner
+            A(i,j) = 1; 
+            A(i-1,j) = -1/4;
+            A(i,j-1) = -1/4;
+            B(j) = 1100/3; 
+         end 
+
+         % Boundary nodes
+        % if(i*deltax <= xdim/2 && j = 1)
+
+
+
+    end
+end
