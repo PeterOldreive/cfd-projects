@@ -46,35 +46,64 @@ B = zeros(Ntot, 1); % Vector of knowns
 
 %% Fill matrix of coefficents and vector of knowns
 
-for j = 1:Ny % For all y points
-    for i = 1:Nx % For all x points 
-         % Define coefficents based on discretized equations
-         % Corner points
-         if(i==1 && j==1) % Bottom left corner
-            A(j,i) = 1; 
-            A(j,i+1) = -1/2;
-            A(j+1, i) = -1/2;
-        elseif(i == Nx && j == 1) % Bottom right corner
-            A(j,i) = 1; 
-            A(j,i-1) = -1/4;
-            A(j+1,i) = -1/4;
-            B(j) = 1100/4; 
-        elseif(i == 1 && j == Ny) % top left corner
-            A(j,i) = 1; 
-            A(j,i+1) = -1/3;
-            A(j-1, i) = -1/3;
-            B(j) = 400/3; 
-         elseif(i == Nx && j == Ny) % top right corner
-            A(i,j) = 1; 
-            A(i-1,j) = -1/4;
-            A(i,j-1) = -1/4;
-            B(j) = 1100/3; 
-         end 
-
-         % Boundary nodes
-        % if(i*deltax <= xdim/2 && j = 1)
-
-
-
+for i = 1:Ntot % For all points
+    j = fix(i-1/Nx) + 1; % Calculate the row number
+  % Corner points 
+    if(i == 1) % Bottom left corner
+       A(j, i) = 1; % Point
+       A(j, i+1) = -1/2; % East point
+       A(j, i+Nx) = -1/2; % North point
+    elseif(i == Nx) % Bottom right corner
+       A(j, i) = 1; % Point
+       A(j, i-1) = -1/4; % West point
+       A(j, i+Nx) = -1/4; % North point
+       B(i) = (T_right + T_bottom)/4; % Known
+    elseif(i == Ntot - Nx) % Top Left
+        A(j, i) = 1; % Point
+        A(j, i+1) = -1/3; % East Point
+        A(j, i-Nx) = -1/3; % South Point
+        B(i) = (T_top)/3; % Known
+    elseif(i == Ntot) % Top right
+        A(j, i) = 1; % Point
+        A(j, i-1) = -1/4; % West point
+        A(j, i-Nx) = -1/4; % South Point
+        B(i) = (T_top + T_right)/4; % Known
     end
+
+    % Boundary Nodes
+    if(j == 1 && i*deltax < xdim/2) % Left Lower boundary
+        A(j, i) = 1; % Point
+        A(j, i+1) = -1/3; % East point
+        A(j, i-1) = -1/3; % West point
+        A(j, i+Nx) = -1/3; % North point
+    elseif(j == 1 && i*deltax >= xdim/2) %Right lower boundary
+        % Right lower boundary contains node at transition point
+        %from Neumann condition to Dirichlet condition. 
+        A(j, i) = 1; % Point
+        A(j, i+1) = -1/4; % East point
+        A(j, i-1) = -1/4; % West point
+        A(j, i+Nx) = -1/4; % North point
+        B(i) = T_bottom/4; % Known
+    elseif(j > 1 && mod(i, Nx) == 1) % Left boundary
+        A(j, i) = 1; % Point
+        A(j, i+1) = -1/3; % East point
+        A(j, i+Nx) = -1/3; % North point
+        A(j, i-Nx) = -1/3; % South point
+    elseif(j > 1 && mod(i, Nx) == 0) % Right boundary
+        A(j, i) = 1; % Point
+        A(j, i-1) = -1/4; % West point
+        A(j, i+Nx) = -1/4; % North point
+        A(j, i-Nx) = -1/4; % South point
+        B(i) = T_right/4; % Known
+    elseif(j == Ntot) % Top 
+        A(j, i) = 1; % Point
+        A(j, i-1) = -1/4; % West point
+        A(j, i+1) = -1/4; % East point
+        A(j, i-Nx) = -1/4; % South point
+        B(i) = T_top/4; % Known
+    end
+
+    
+
+
 end
