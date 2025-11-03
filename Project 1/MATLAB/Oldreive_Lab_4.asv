@@ -127,18 +127,8 @@ end
 % Generate vector of discretized x-values
 x_values = zeros(Nx,1);
 for x = 1:Nx
-    x_values(x) = (x) * deltax; 
+    x_values(x) = (x - 1) * deltax; 
 end
-
-% Generate vector of discretized y-values
-y_values = zeros(Ny,1);
-for y = 1:Ny
-    y_values(y) = (y) * deltay; 
-end
-
-% Make a grid of coordinates
-[X, Y] = meshgrid(x_values, y_values);
-
 
 %% Plotting
 
@@ -155,19 +145,17 @@ view(45,45);
 % 2D Temperature Field
 figure;
 imagesc(T_plot);
-hold on
 set(gca,'YDir','normal'); % make y increase upward visually
 axis equal tight;
 colorbar;
 title('Temperature contour map');
 xlabel('x-index');
 ylabel('y-index');
-plot(X/10, Y/10, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
 
 % Temperature along bottom boundary
 figure(); 
-T_bottom_values = T_plot(1, :); % Make botttom boundary a vector
-plot(x_values, T_bottom_values, 'o','LineWidth', 2); 
+T_bottom_values = T_plot(1, :); % Extract temperature values along the bottom boundary
+plot(x_values, T_bottom_values, 'LineWidth', 2);
 xlabel('x (mm)');
 ylabel('Temperature (°C)');
 title('Temperature Distribution along Bottom Boundary');
