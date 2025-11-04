@@ -82,13 +82,11 @@ j = fix((i-1)/Nx) + 1; % Calculate the row number
         A(i, i-1) = -1; % West point
         A(i, i+Nx) = -1; % North point
         B(i) = T_bottom; % Known
-       
     elseif(j > 1 && mod(i, Nx) == 1 && j<Ny) % Left boundary
         A(i, i) = 3; % Point
         A(i, i+1) = -1; % East point
         A(i, i+Nx) = -1; % North point
         A(i, i-Nx) = -1; % South point
-
     elseif(j > 1 && mod(i, Nx) == 0 && j < Ny) % Right boundary
         A(i, i) = 4; % Point
         A(i, i-1) = -1; % West point
@@ -140,6 +138,19 @@ end
 % Make a grid of coordinates
 [X, Y] = meshgrid(x_values, y_values);
 
+% Generate a vector of bottom boundary, and 50 mm steps to top
+T_bottom_values = T_plot(1, :); % Make botttom boundary a vector
+T_50mm_above_bottom = T_plot(fix(50/deltay), :); % Closest point to 
+                                                  % 50mm above bottom
+                                                  % boundary
+T_100mm_above_bottom = T_plot(fix(100/deltay), :); % Closest point to 
+                                                  % 100 mm above bottom
+                                                  % boundary
+T_150mm_above_bottom = T_plot(fix(150/deltay), :); % Closest point to 
+                                                  % 150mm above bottom
+                                                  % boundary
+T_top_values = T_plot(Ny, :); % Top boundary 
+
 
 %% Plotting
 
@@ -177,12 +188,22 @@ xlabel('x-Coordinate (mm)');
 ylabel('y-Coordinate (mm)'); 
 % plot(X/10, Y/10, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
 
-% Temperature along bottom boundary
+% Temperature along bottom boundary, plus 50 mm above 
 figure(); 
-T_bottom_values = T_plot(1, :); % Make botttom boundary a vector
-plot(x_values, T_bottom_values, 'o','LineWidth', 2); 
+plot(x_values, T_bottom_values, 'o', 'MarkerSize', 6, 'color', 'r');
+hold on;
+plot(x_values, T_50mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'b');
+hold on; 
+plot(x_values, T_100mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'g');
+hold on;
+plot(x_values, T_150mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'k');
+hold on;
+plot(x_values, T_top_values, 'o', 'MarkerSize', 6, 'color', 'm');
+hold on;
 xlabel('x (mm)');
 ylabel('Temperature (°C)');
-title('Temperature Distribution along Bottom Boundary Nodes');
+title('Temperature Distribution along Bottom Boundary Nodes and 50 mm Above');
+legend('Bottom Boundary', 'y = 50 mm', 'y = 100 mm', 'y = 150 mm', ... 
+    'Top Boundary', 'Location','southoutside'); 
 grid on;
 
