@@ -50,63 +50,63 @@ for i = 1:Ntot % For all points
 j = fix((i-1)/Nx) + 1; % Calculate the row number
   % Corner points 
     if(i == 1) % Bottom left corner
-       A(i, i) = 1; % Point
-       A(i, i+1) = -1/2; % East point
-       A(i, i+Nx) = -1/2; % North point
+       A(i, i) = 2; % Point
+       A(i, i+1) = -1; % East point
+       A(i, i+Nx) = -1; % North point
     elseif(i == Nx) % Bottom right corner
-       A(i, i) = 1; % Point
-       A(i, i-1) = -1/4; % West point
-       A(i, i+Nx) = -1/4; % North point
-       B(i) = (T_right + T_bottom)/4; % Known
+       A(i, i) = 4; % Point
+       A(i, i-1) = -1; % West point
+       A(i, i+Nx) = -1; % North point
+       B(i) = (T_right + T_bottom); % Known
     elseif(i == Ntot - Nx + 1) % Top Left
-        A(i, i) = 1; % Point
-        A(i, i+1) = -1/3; % East Point
-        A(i, i-Nx) = -1/3; % South Point
-        B(i) = (T_top)/3; % Known
+        A(i, i) = 3; % Point
+        A(i, i+1) = -1; % East Point
+        A(i, i-Nx) = -1; % South Point
+        B(i) = (T_top); % Known
     elseif(i == Ntot) % Top right
-        A(i, i) = 1; % Point
-        A(i, i-1) = -1/4; % West point
-        A(i, i-Nx) = -1/4; % South Point
-        B(i) = (T_top + T_right)/4; % Known
+        A(i, i) = 4; % Point
+        A(i, i-1) = -1; % West point
+        A(i, i-Nx) = -1; % South Point
+        B(i) = (T_top + T_right); % Known
     % Boundary Nodes
     elseif(j == 1 && i*deltax < xdim/2 && i > 1) % Left Lower boundary
-        A(i, i) = 1; % Point
-        A(i, i+1) = -1/3; % East point
-        A(i, i-1) = -1/3; % West point
-        A(i, i+Nx) = -1/3; % North point
+        A(i, i) = 3; % Point
+        A(i, i+1) = -1; % East point
+        A(i, i-1) = -1; % West point
+        A(i, i+Nx) = -1; % North point
     elseif(j == 1 && i*deltax >= xdim/2 && i < Nx) %Right lower boundary
         % Right lower boundary contains node at transition point
         %from Neumann condition to Dirichlet condition. 
-        A(i, i) = 1; % Point
-        A(i, i+1) = -1/4; % East point
-        A(i, i-1) = -1/4; % West point
-        A(i, i+Nx) = -1/4; % North point
-        B(i) = T_bottom/4; % Known
+        A(i, i) = 4; % Point
+        A(i, i+1) = -1; % East point
+        A(i, i-1) = -1; % West point
+        A(i, i+Nx) = -1; % North point
+        B(i) = T_bottom; % Known
        
     elseif(j > 1 && mod(i, Nx) == 1 && j<Ny) % Left boundary
-        A(i, i) = 1; % Point
-        A(i, i+1) = -1/3; % East point
-        A(i, i+Nx) = -1/3; % North point
-        A(i, i-Nx) = -1/3; % South point
+        A(i, i) = 3; % Point
+        A(i, i+1) = -1; % East point
+        A(i, i+Nx) = -1; % North point
+        A(i, i-Nx) = -1; % South point
 
     elseif(j > 1 && mod(i, Nx) == 0 && j < Ny) % Right boundary
-        A(i, i) = 1; % Point
-        A(i, i-1) = -1/4; % West point
-        A(i, i+Nx) = -1/4; % North point
-        A(i, i-Nx) = -1/4; % South point
-        B(i) = T_right/4; % Known
+        A(i, i) = 4; % Point
+        A(i, i-1) = -1; % West point
+        A(i, i+Nx) = -1; % North point
+        A(i, i-Nx) = -1; % South point
+        B(i) = T_right; % Known
     elseif(j == Ny && i > Nx*(j-1) + 1 && i < Nx*j) % Top 
-        A(i, i) = 1; % Point
-        A(i, i-1) = -1/4; % West point
-        A(i, i+1) = -1/4; % East point
-        A(i, i-Nx) = -1/4; % South point
-        B(i) = T_top/4; % Known
+        A(i, i) = 4; % Point
+        A(i, i-1) = -1; % West point
+        A(i, i+1) = -1; % East point
+        A(i, i-Nx) = -1; % South point
+        B(i) = T_top; % Known
     else % Interior nodes
-        A(i, i) = 1; % Point
-        A(i, i-1) = -1/4; % West point
-        A(i, i+1) = -1/4; % East point
-        A(i, i+Nx) = -1/4; % North point
-        A(i, i-Nx) = -1/4; % South point
+        A(i, i) = 4; % Point
+        A(i, i-1) = -1; % West point
+        A(i, i+1) = -1; % East point
+        A(i, i+Nx) = -1; % North point
+        A(i, i-Nx) = -1; % South point
     end
 end
 
@@ -123,6 +123,7 @@ for y = 1:Ny
      index = index + 1;
     end
 end
+writematrix(T_plot, 'Temperature_Field.csv');
 
 % Generate vector of discretized x-values
 x_values = zeros(Nx,1);
@@ -152,6 +153,18 @@ title('Temperature field (surface view)');
 colorbar;
 view(45,45);
 
+% Show discretized 2D grid of Nx x Ny points
+figure;
+plot(X, Y, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
+set(gca,'YDir','normal'); % make y increase upward visually
+axis equal tight;
+xlim([0 xdim])
+ylim([0 ydim])
+title('Discretized Grid of Nx x Ny Points Spaced by \Deltax and \Deltay');
+xlabel('x-Coordinate (mm)');
+ylabel('y-Coordinate (mm)'); 
+
+
 % 2D Temperature Field
 figure;
 imagesc(T_plot);
@@ -160,9 +173,9 @@ set(gca,'YDir','normal'); % make y increase upward visually
 axis equal tight;
 colorbar;
 title('Temperature contour map');
-xlabel('x-index');
-ylabel('y-index');
-plot(X/10, Y/10, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
+xlabel('x-Coordinate (mm)');
+ylabel('y-Coordinate (mm)'); 
+% plot(X/10, Y/10, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
 
 % Temperature along bottom boundary
 figure(); 
@@ -170,6 +183,6 @@ T_bottom_values = T_plot(1, :); % Make botttom boundary a vector
 plot(x_values, T_bottom_values, 'o','LineWidth', 2); 
 xlabel('x (mm)');
 ylabel('Temperature (°C)');
-title('Temperature Distribution along Bottom Boundary');
+title('Temperature Distribution along Bottom Boundary Nodes');
 grid on;
 
