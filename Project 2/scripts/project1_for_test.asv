@@ -110,9 +110,13 @@ end
 
 %%  Direct solve for T values
 T = A \ B; 
+cd(['' ...
+    ''])
+csvwrite("tools/coeff_matrix.csv", A);
+csvwrite('/tools/knows.csv', B);
 
-csvwrite("tools/coeff_matrix.csv", A)
-csvwrite('')
+run('gauss_seidel.m');
+
 
 %% Post Process
 

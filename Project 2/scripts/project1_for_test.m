@@ -110,9 +110,16 @@ end
 
 %%  Direct solve for T values
 T = A \ B; 
+  
+csvwrite("tools/coeff_matrix.csv", A);
+csvwrite('tools/knowns.csv', B);
 
-csvwrite("tools/coeff_matrix.csv", A)
-csvwrite('')
+run('tools/gauss_seidel.m');
+
+TGS = readmatrix('tools/solution_vector.csv');
+
+Test = abs(TGS - T); 
+max(Test)
 
 %% Post Process
 
