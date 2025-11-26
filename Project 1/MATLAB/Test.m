@@ -107,7 +107,6 @@ j = fix((i-1)/Nx) + 1; % Calculate the row number
         A(i, i-Nx) = -1; % South point
     end
 end
-
 %%  Direct solve for T values
 T = A \ B; 
 %% Post Process
@@ -279,3 +278,6 @@ title('Temperature Distribution along Veritical Cutlines');
 legend('Left Boundary', 'x = 100 mm', 'x = 200 mm', 'x = 300 mm', ... 
     'Right Boundary', 'Location','southoutside'); 
 grid on;
+
+
+ 
