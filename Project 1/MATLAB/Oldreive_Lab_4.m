@@ -110,6 +110,10 @@ end
 
 %%  Direct solve for T values
 T = A \ B; 
+
+csvwrite("tools/coeff_matrix.csv", A)
+csvwrite('')
+
 %% Post Process
 
 % Turn vector T into an NyxNx matrix
