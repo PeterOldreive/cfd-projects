@@ -8,7 +8,7 @@
 % Created: 2025-11-24
 % Updated: 2025-11-24
 %% Convergance specific parameters 
-omega          = 1.9;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
+omega          = 1.95;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
 tol            = 1e-6;    % convergence tolerance 
 maxIterations = 5000; % Maximum number of iterations before forcing 
                        % convergance of the algorithm
@@ -62,7 +62,7 @@ xj = guess * ones(coeffDim(1),1);
 %% Run iteritve Gauss-Seidel Method 
 for iter = 1:maxIterations % Iterate until maximum number has been reached
     xj_1 = xj; 
-    disp(iter)
+    % disp(iter)
     for i = 1:coeffDim(1) % Loop for number of rows in coeff matrix
         aii = coeffMatrix(i, i); % Coefficent aii lies along the main 
                                  % diagonal of the matrix of coefficents 
