@@ -1,0 +1,47 @@
+clear all; close all; clc; 
+%% 
+% Peter Oldreive
+% B00894035
+% MECH 4865 - CFD
+% Project 2
+% Created: Nov 24, 2025
+% Updated: Nov 26, 2025
+% 
+% This program calculates the steady state temperature field of a 2D plane 
+% subject to known boundary conditions. This is to statify the requirements 
+% of MECH 4865 Project 2. The program does not use a direct solver to
+% calcualte the temperature distribution, the temperatures are calculated
+% using the Gauss_Seidel method by referencing an external script. 
+
+%% Define Plate dimensions 
+xdim = 800; % x-dimension of plate (mm)
+ydim = 400; % y-deimension of plate (mm)           
+
+%% Define Boundary Conditions
+
+% Dirichlet Boundaries 
+T_top = 0; % Top Dirichlet condition (K)
+T_bottom = 0; % Bottom Dirichlet condition (K)
+T_right = 0; % Right Dirichlet condition (K)
+T_left = 0;        % Left Dirichlet condtition (K)
+
+% Neumann conditions
+% West Wall
+% South wall from 0 <= x <= 400 mm
+% East Wall
+bc_trasnition = 400; % Transition point of bottom boundary condtion from 
+                     % Neumann condtion to Newton/Robin
+
+% Newton/Robin Boundaries
+h_south = 1200; % South boundary convection coefficient (W/m^2)
+T_inf_south = 300; % South boundary fluid temperature (K) 
+
+h_north = 1500; % North boundary convection coefficent (W/m^2)
+T_inf_north = 1800; % North boundary fluid temperature (K) 
+
+%% Define Finite Volume Cell Size 
+deltax = input("Cell x-dimension (mm): "); % Cell x-dimension (mm)
+deltay = input("Cell y-dimension (mm): "); % Cell y-dimension (mm)
+
+% Define number of cells in the grid
+Nx = xdim

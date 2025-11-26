@@ -7,8 +7,14 @@
 % Author: Peter Oldreive
 % Created: 2025-11-24
 % Updated: 2025-11-24
+%% Convergance specific parameters 
+omega          = 1.9;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
+tol            = 1e-6;    % convergence tolerance 
+maxIterations = 5000; % Maximum number of iterations before forcing 
+                       % convergance of the algorithm
+guess = 300; % First guess of solution vector values 
 
-
+%% Define function for the element wise Gauss-Siedel Formula
 function xik1 = element_based(xj_1, xj, aij, bi, aii, index)
     % This function solves the element based equation for the Gauss-Seidel
     % method fof element xi(k+1), using xj(k+1), xj, aij, bi
@@ -30,6 +36,8 @@ function xik1 = element_based(xj_1, xj, aij, bi, aii, index)
     xik1 = (bi - sumxj1 - sumxj) / aii;
 end
 
+%% Import .csv Files from External Script 
+
 % Import matrx of coefficents
 coeffMatrix = readmatrix('coeff_matrix.csv');
 % Import vector of knowns
@@ -40,22 +48,21 @@ knownVector = readmatrix('knowns.csv');
 if (length(coeffMatrix(:,1)) ~= length(knownVector)) | ...
     (length(coeffMatrix(1,:)) ~= length(knownVector))
     fprintf('Matrix and Vector not Compatble \n')
+    % Write a 2x1 matrix of zeros to provide some output 
+    writematrix(zeros(2,1), 'solution_vector.csv');
+    return; % Pause running script 
 end 
 
+%% Initialize first Guess of Solution Vector
 % Initialize the guess for temperature values (assume 300 K)
 coeffDim = size(coeffMatrix); % Save dimensions of coefficent matrix
 % Initialize solution vector with 300 K 
-xj = 300 * ones(coeffDim(1),1); 
+xj = guess * ones(coeffDim(1),1); 
 
-
-
-omega          = 1;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
-tol            = 1e-6;    % convergence tolerance 
-maxIterations = 5000; % Maximum number of iterations before forcing 
-                       % convergance of the algorithm
-
+%% Run iteritve Gauss-Seidel Method 
 for iter = 1:maxIterations % Iterate until maximum number has been reached
     xj_1 = xj; 
+    disp(iter)
     for i = 1:coeffDim(1) % Loop for number of rows in coeff matrix
         aii = coeffMatrix(i, i); % Coefficent aii lies along the main 
                                  % diagonal of the matrix of coefficents 
@@ -67,7 +74,7 @@ for iter = 1:maxIterations % Iterate until maximum number has been reached
         xj(i) = element_based(xj_1, xj, aij, bi, aii, i); 
 
         % SOR update
-        %xj(i) = (1-omega)*xj_1(i) + omega * xj(i);
+        xj(i) = (1-omega)*xj_1(i) + omega * xj(i);
             
     end
     % Check for convergance 
@@ -79,5 +86,8 @@ for iter = 1:maxIterations % Iterate until maximum number has been reached
     end
 end
 
+%% Output results 
 % Save solution vector to a .csv file
 writematrix(xj, 'solution_vector.csv');
+
+return; 

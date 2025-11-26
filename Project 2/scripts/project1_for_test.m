@@ -1,4 +1,4 @@
-clear; close all; clc;
+clear; close all; clc; tic;
 %% 
 % Peter Oldreive
 % B00894035
@@ -120,6 +120,10 @@ TGS = readmatrix('tools/solution_vector.csv');
 
 Test = abs(TGS - T); 
 max(Test)
+
+%Record compute time
+endtime = toc; 
+fprintf("Compute time: %d s \n", round(endtime)) % Print compute time 
 
 %% Post Process
 
