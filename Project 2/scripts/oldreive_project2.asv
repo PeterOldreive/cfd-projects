@@ -77,14 +77,14 @@ xy = deltax/deltay; % Shorthand coefficient for use later
 % Define coefficents from ficticious node analysis 
 
 % North boundary
-apfn = 1 - (deltay*h_north)/(2*k); % coefficent from equation derivation
-asfn = 1 + (deltay*h_north)/(2*k); % coefficent from equation derivation
-bpfn = - (h_north*deltay*T_inf_north)/k; % coefficent from equation derivation
+apfn = 1 + (deltay*h_north)/(2*k); % coefficent from equation derivation
+asfn = -1 + (deltay*h_north)/(2*k); % coefficent from equation derivation
+bpfn = (h_north*deltay*T_inf_north)/k; % coefficent from equation derivation
 
 % South boundary 
 apfs = 1 + (deltay*h_south)/(2*k); % coefficent from equation derivation
-anfs = 1 - (deltay*h_south)/(2*k); % coefficent from equation derivation
-bpfs = - (h_south*deltay*T_inf_south)/k; % coefficent from equation derivation
+anfs = - 1 + (deltay*h_south)/(2*k); % coefficent from equation derivation
+bpfs = (h_south*deltay*T_inf_south)/k; % coefficent from equation derivation
 
 for i = 1:Ntot % For all points 
 j = fix((i-1)/Nx) + 1; % Calculate the row number
@@ -97,17 +97,17 @@ j = fix((i-1)/Nx) + 1; % Calculate the row number
        A(i, i) = -((2+anfs/apfs)*xy + yx); % Cell
        A(i, i-1) = yx; % West Cell
        A(i, i+Nx) = xy; % North Cell
-       B(i) = xy*bpfs/apfs; % Known
+       B(i) = -xy*bpfs/apfs; % Known
     elseif(i == Ntot - Nx + 1) % Top Left
         A(i, i) = -((2+asfn/apfs)*xy + yx); % Cell
         A(i, i+1) = yx; % East Cell
         A(i, i-Nx) = xy; % South Cell
-        B(i) = xy*bpfn/apfn; % Known
+        B(i) = -xy*bpfn/apfn; % Known
     elseif(i == Ntot) % Top right
         A(i, i) = -((2+asfn/apfn)*xy + yx); % Point
         A(i, i-1) = yx; % West point
         A(i, i-Nx) = xy; % South Point
-        B(i) = xy*bpfn/apfn; % Known
+        B(i) = -xy*bpfn/apfn; % Known
     % Boundary Nodes
     elseif(j == 1 && i*deltax < xdim/2 && i > 1) % Left Lower boundary
         A(i, i) = -(2*yx+xy); % Point
@@ -121,7 +121,7 @@ j = fix((i-1)/Nx) + 1; % Calculate the row number
         A(i, i+1) = yx; % East point
         A(i, i-1) = yx; % West point
         A(i, i+Nx) = xy; % North point
-        B(i) = xy*bpfs/apfs; % Known
+        B(i) = -xy*bpfs/apfs; % Known
     elseif(j > 1 && mod(i, Nx) == 1 && j<Ny) % Left boundary
         A(i, i) = -(2*xy + yx); % Point
         A(i, i+1) = yx; % East point
@@ -137,7 +137,7 @@ j = fix((i-1)/Nx) + 1; % Calculate the row number
         A(i, i-1) = yx; % West point
         A(i, i+1) = yx; % East point
         A(i, i-Nx) = xy; % South point
-        B(i) = xy*bpfn/apfn; % Known
+        B(i) = -xy*bpfn/apfn; % Known
     else % Interior nodes
         A(i, i) = -2*(xy+yx); % Point
         A(i, i-1) = yx; % West point
@@ -164,6 +164,160 @@ T = readmatrix('tools/solution_vector.csv');
 endtime = toc; 
 fprintf("Compute time: %d s\n", round(endtime)) % Print compute time
 
+
+
+
+
 %% Test solution
+T2 = A \ B; 
+Test = abs(T2 - T); 
+fprintf('%d \n', max(Test))
 
 %% Post Process 
+
+% Turn temperature vector into a NyxNx matrix for plotting
+
+T_plot = zeros(Ny, Nx); % Define matrix
+index = 1; % Index prepresents point number  
+for y = 1:Ny % For all rows
+    for x = 1:Nx % For all columns
+     T_plot(y,x) = T(index);  
+     index = index + 1;
+    end
+end
+
+% Write matrix of temperature field for later comparison
+writematrix(T_plot, 'Temperature_Field.csv');
+
+% Generate vector of discretized x-values
+x_values = zeros(Nx,1);
+for x = 1:Nx
+    x_values(x) = (x-1) * deltax; 
+end
+
+% Generate vector of discretized y-values
+y_values = zeros(Ny,1);
+for y = 1:Ny
+    y_values(y) = (y-1) * deltay; 
+end
+
+% Make a grid of coordinates
+[X, Y] = meshgrid(x_values, y_values);
+
+
+% Generate a vector of bottom boundary, and 100 mm steps to top
+T_bottom_values = T_plot(1, :); % Make botttom boundary a vector
+T_100mm_above_bottom = T_plot(fix(0.100/deltay), :); % Closest point to 
+                                                  % 50mm above bottom
+                                                  % boundary
+T_200mm_above_bottom = T_plot(fix(0.200/deltay), :); % Closest point to 
+                                                  % 100 mm above bottom
+                                                  % boundary
+T_300mm_above_bottom = T_plot(fix(0.300/deltay), :); % Closest point to 
+                                                  % 150mm above bottom
+                                                  % boundary
+T_top_values = T_plot(Ny, :); % Top boundary 
+
+% Generate cutlines paralell to the y-axis in 100 mm increments
+T_left_values = T_plot(:,1); % 1st column is left boundary
+T_x_200 = T_plot(:, fix(0.200/deltax)); % Temperatures at 100 mm right of the
+                                      % left boundary
+T_x_400 = T_plot(:, fix(0.400/deltay)); % temperatures at 200 mm right of the 
+                                      % left boundary
+T_x_600 = T_plot(:, fix(0.600/deltay)); % Temperatures at 300 mm right of the 
+                                      % left boundary
+T_right_values = T_plot(:, Nx); % Right boundary temperatues
+
+% Find diagonal vector
+rowcount = 1; % Start in 1st row
+T_diag = zeros(Nx, 1); % Define diagonal vector
+for columncount = 2:Nx % count up to Nx
+   
+    if (mod(columncount, 2) == 0 && rowcount < Ny+2) % count up rows until max
+        T_diag(rowcount, 1) = T_plot(rowcount, columncount); % index diagonals out of matrix
+        rowcount = rowcount + 1; % Count up row     
+    end
+
+  
+end 
+
+%% Plotting
+
+% Show discretized 2D grid of Nx x Ny points
+figure;
+plot(X, Y, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
+set(gca,'YDir','normal'); % make y increase upward visually
+axis equal tight;
+xlim([0 xdim])
+ylim([0 ydim])
+title('Discretized Grid of Nx x Ny Points Spaced by \Deltax and \Deltay');
+xlabel('x-Coordinate (m)');
+ylabel('y-Coordinate (m)'); 
+
+% 2D Colourmap
+figure('Name', '2D Colour Map','NumberTitle','off');
+hold on
+contourf(T_plot,500:20:1800,'LineColor', "none"); % Add Contour Lines every 10 K
+set(gca,'YDir','normal');
+axis equal tight;
+a=colorbar;
+a.Label.String = 'Temperature, T (K)';
+a.Limits = [500 1800];
+title('2D Colourmap with Contour Lines');
+xlabel('x-Coordinate (m)');
+ylabel('y-Coordiante (m)');
+xticks(0:0.10/deltax:Nx)
+xticklabels(0:0.10:xdim)
+yticks(0:0.1/deltay:Ny)
+yticklabels(0:0.10:ydim)
+xlim([0 Nx]);
+ylim([0 Ny]); 
+
+% Temperature along horizontal cutlines 
+figure(); 
+plot(x_values, T_bottom_values, 'o', 'MarkerSize', 6, 'color', 'r', ...
+    'LineStyle','--' );
+hold on;
+plot(x_values, T_100mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'b', ...
+    'LineStyle','--' );
+hold on; 
+plot(x_values, T_200mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'g', ...
+    'LineStyle','--' );
+hold on;
+plot(x_values, T_300mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'k', ...
+    'LineStyle','--' );
+hold on;
+plot(x_values, T_top_values, 'o', 'MarkerSize', 6, 'color', 'm', ...
+    'LineStyle','--');
+hold on;
+xlabel('x (m)');
+ylabel('Temperature (K)');
+title('Temperature Distribution along Horizontal Cutlines');
+legend('Bottom Boundary', 'y = 100 mm', 'y = 200 mm', 'y = 300 mm', ... 
+    'Top Boundary', 'Location','southwest'); 
+grid on;
+
+% Temperature cutlines paralell to y-axis
+figure(); 
+plot( y_values, T_left_values, 'o', 'MarkerSize', 6, 'color', 'r', ...
+    'LineStyle','--');
+hold on;
+plot( y_values, T_x_200, 'o', 'MarkerSize', 6, 'color', 'b', ...
+    'LineStyle','--');
+hold on; 
+plot(y_values, T_x_400, 'o', 'MarkerSize', 6, 'color', 'g', ... 
+    'LineStyle','--');
+hold on;
+plot(y_values, T_x_600, 'o', 'MarkerSize', 6, 'color', 'k', ...
+    'LineStyle', '--');
+hold on;
+plot(y_values , T_right_values, 'o', 'MarkerSize', 6, 'color', 'm', ...
+    'LineStyle', '--');
+hold on;
+%ylim([350 700])
+xlabel('y-Coordinate (m)');
+ylabel('Temperature (K)');
+title('Temperature Distribution along Veritical Cutlines');
+legend('Left Boundary', 'x = 200 mm', 'x = 400 mm', 'x = 600 mm', ... 
+    'Right Boundary', 'Location','southoutside'); 
+grid on;

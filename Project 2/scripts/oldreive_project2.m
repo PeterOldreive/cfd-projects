@@ -191,44 +191,57 @@ writematrix(T_plot, 'Temperature_Field.csv');
 
 % Generate vector of discretized x-values
 x_values = zeros(Nx,1);
-for x = 1:Nx
-    x_values(x) = (x) * deltax; 
+for x = 1:Nx 
+    x_values(x) = (x-1) * deltax; 
 end
 
 % Generate vector of discretized y-values
 y_values = zeros(Ny,1);
 for y = 1:Ny
-    y_values(y) = (y) * deltay; 
+    y_values(y) = (y-1) * deltay; 
 end
 
 % Make a grid of coordinates
 [X, Y] = meshgrid(x_values, y_values);
 
 
-% % Generate a vector of bottom boundary, and 50 mm steps to top
-% T_bottom_values = T_plot(1, :); % Make botttom boundary a vector
-% T_50mm_above_bottom = T_plot(fix(50/deltay), :); % Closest point to 
-%                                                   % 50mm above bottom
-%                                                   % boundary
-% T_100mm_above_bottom = T_plot(fix(100/deltay), :); % Closest point to 
-%                                                   % 100 mm above bottom
-%                                                   % boundary
-% T_150mm_above_bottom = T_plot(fix(150/deltay), :); % Closest point to 
-%                                                   % 150mm above bottom
-%                                                   % boundary
-% T_top_values = T_plot(Ny, :); % Top boundary 
+% Generate a vector of bottom boundary, and 100 mm steps to top
+T_bottom_values = T_plot(1, :); % Make botttom boundary a vector
+T_100mm_above_bottom = T_plot(fix(0.100/deltay), :); % Closest point to 
+                                                  % 50mm above bottom
+                                                  % boundary
+T_200mm_above_bottom = T_plot(fix(0.200/deltay), :); % Closest point to 
+                                                  % 100 mm above bottom
+                                                  % boundary
+T_300mm_above_bottom = T_plot(fix(0.300/deltay), :); % Closest point to 
+                                                  % 150mm above bottom
+                                                  % boundary
+T_top_values = T_plot(Ny, :); % Top boundary 
+
+% Generate cutlines paralell to the y-axis in 100 mm increments
+T_left_values = T_plot(:,1); % 1st column is left boundary
+T_x_200 = T_plot(:, fix(0.200/deltax)); % Temperatures at 100 mm right of the
+                                      % left boundary
+T_x_400 = T_plot(:, fix(0.400/deltay)); % temperatures at 200 mm right of the 
+                                      % left boundary
+T_x_600 = T_plot(:, fix(0.600/deltay)); % Temperatures at 300 mm right of the 
+                                      % left boundary
+T_right_values = T_plot(:, Nx); % Right boundary temperatues
+
+% Find diagonal vector
+rowcount = 1; % Start in 1st row
+T_diag = zeros(Nx/2, 1); % Define diagonal vector
+for columncount = 2:Nx % count up to Nx
+   
+    if (mod(columncount, 2) == 0 && rowcount < Ny+2) % count up rows until max
+        T_diag(rowcount, 1) = T_plot(rowcount, columncount); % index diagonals out of matrix
+        rowcount = rowcount + 1; % Count up row     
+    end
+
+  
+end 
 
 %% Plotting
-
-% % 3D Plot
-% figure;
-% surf(T_plot,'EdgeColor','k');
-% xlabel('x-index');
-% ylabel('y-index');
-% zlabel('Temperature');
-% title('Temperature field (surface view)');
-% colorbar;
-% view(45,45);
 
 % Show discretized 2D grid of Nx x Ny points
 figure;
@@ -238,37 +251,81 @@ axis equal tight;
 xlim([0 xdim])
 ylim([0 ydim])
 title('Discretized Grid of Nx x Ny Points Spaced by \Deltax and \Deltay');
-xlabel('x-Coordinate (mm)');
-ylabel('y-Coordinate (mm)'); 
+xlabel('x-Coordinate (m)');
+ylabel('y-Coordinate (m)'); 
 
-
-% 2D Temperature Field
-figure;
-imagesc(T_plot);
+% 2D Colourmap
+figure('Name', '2D Colour Map','NumberTitle','off');
 hold on
-set(gca,'YDir','normal'); % make y increase upward visually
+contourf(T_plot,500:20:1800,'LineColor', "none"); % Add Contour Lines every 10 K
+set(gca,'YDir','normal');
 axis equal tight;
-colorbar;
-title('Temperature contour map');
-xlabel('x-Coordinate (mm)');
-ylabel('y-Coordinate (mm)'); 
-% plot(X/10, Y/10, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
+a=colorbar;
+a.Label.String = 'Temperature, T (K)';
+a.Limits = [500 1800];
+title('2D Colourmap with Contour Lines');
+xlabel('x-Coordinate (m)');
+ylabel('y-Coordiante (m)');
+xticks(0:0.10/deltax:Nx)
+xticklabels(0:0.10:xdim)
+yticks(0:0.1/deltay:Ny)
+yticklabels(0:0.10:ydim)
 
-% % Temperature along bottom boundary, plus 50 mm above 
-% figure(); 
-% plot(x_values, T_bottom_values, 'o', 'MarkerSize', 6, 'color', 'r');
-% hold on;
-% plot(x_values, T_50mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'b');
-% hold on; 
-% plot(x_values, T_100mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'g');
-% hold on;
-% plot(x_values, T_150mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'k');
-% hold on;
-% plot(x_values, T_top_values, 'o', 'MarkerSize', 6, 'color', 'm');
-% hold on;
-% xlabel('x (mm)');
-% ylabel('Temperature (°C)');
-% title('Temperature Distribution along Bottom Boundary Nodes and 50 mm Above');
-% legend('Bottom Boundary', 'y = 50 mm', 'y = 100 mm', 'y = 150 mm', ... 
-%     'Top Boundary', 'Location','southoutside'); 
-% grid on;
+
+% Temperature along horizontal cutlines 
+figure(); 
+plot(x_values, T_bottom_values, 'o', 'MarkerSize', 6, 'color', 'r', ...
+    'LineStyle','--' );
+hold on;
+plot(x_values, T_100mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'b', ...
+    'LineStyle','--' );
+hold on; 
+plot(x_values, T_200mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'g', ...
+    'LineStyle','--' );
+hold on;
+plot(x_values, T_300mm_above_bottom, 'o', 'MarkerSize', 6, 'color', 'k', ...
+    'LineStyle','--' );
+hold on;
+plot(x_values, T_top_values, 'o', 'MarkerSize', 6, 'color', 'm', ...
+    'LineStyle','--');
+hold on;
+xlabel('x (m)');
+ylabel('Temperature (K)');
+title('Temperature Distribution along Horizontal Cutlines');
+legend('Bottom Boundary', 'y = 100 mm', 'y = 200 mm', 'y = 300 mm', ... 
+    'Top Boundary', 'Location','southwest'); 
+grid on;
+
+% Temperature cutlines paralell to y-axis
+figure(); 
+plot( y_values, T_left_values, 'o', 'MarkerSize', 6, 'color', 'r', ...
+    'LineStyle','--');
+hold on;
+plot( y_values, T_x_200, 'o', 'MarkerSize', 6, 'color', 'b', ...
+    'LineStyle','--');
+hold on; 
+plot(y_values, T_x_400, 'o', 'MarkerSize', 6, 'color', 'g', ... 
+    'LineStyle','--');
+hold on;
+plot(y_values, T_x_600, 'o', 'MarkerSize', 6, 'color', 'k', ...
+    'LineStyle', '--');
+hold on;
+plot(y_values , T_right_values, 'o', 'MarkerSize', 6, 'color', 'm', ...
+    'LineStyle', '--');
+hold on;
+xlabel('y-Coordinate (m)');
+ylabel('Temperature (K)');
+title('Temperature Distribution along Veritical Cutlines');
+legend('Left Boundary', 'x = 200 mm', 'x = 400 mm', 'x = 600 mm', ... 
+    'Right Boundary', 'Location','southeast'); 
+grid on;
+
+% Diagonal Temperature 
+figure(); 
+plot(deltax:2*deltax:xdim, T_diag, 'o', 'MarkerSize', 5, 'color', 'r', ...
+    'LineStyle','--');
+hold on;
+ylabel('Temperature (K)');
+xlabel('x-Coordinate (mm)');
+title('Temperature Along Diagonal Cutline (Bottom Left to Top Right)');
+grid on;
