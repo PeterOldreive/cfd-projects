@@ -176,32 +176,31 @@ xj = guess * ones(coeffDim(1),1);
 for iter = 1:maxIterations % Iterate until maximum number has been reached
     xj_1 = xj; 
     disp(iter)
-    for i = 1:coeffDim(1) % Loop for number of rows in coeff matrix
-        aii = A(i, i); % Coefficent aii lies along the main 
-                                 % diagonal of the matrix of coefficents 
-        aij = A(i, :); % all coefficents for the row i in the 
-                                 % matrix of coefficents
-        bi = B(i);   % Pull appropriate known value from vector 
+    for i = 1:Ntot % Loop for number of rows in coeff matrix
+        % aii = A(i, i); % Coefficent aii lies along the main 
+        %                          % diagonal of the matrix of coefficents 
+        % aij = A(i, :); % all coefficents for the row i in the 
+        %                          % matrix of coefficents
+        % bi = B(i);   % Pull appropriate known value from vector 
         
         % Call function to impliment elementwise formula 
         %xj(i) = element_based(xj_1, xj, aij, bi, aii, i); 
-        %sumxj1 = 0;
-        % Sum aij, xj(k+1)
-        % for j = 1:(i - 1)
-        %     sumxj1 = sumxj1 + aij(j)*xj(j);
-        % end 
-        sumxj1 = sum(aij*xj,1:(i-1));
-        %sumxj = 0; 
+        sumxj1 = 0;
+        %Sum aij, xj(k+1)
+        for j = 1:(i - 1)
+            sumxj1 = sumxj1 + A(i,j)*xj(j);
+        end 
+        %sumxj1 = sum(aij*xj,1:(i-1));
+        sumxj = 0; 
         % Sum aij, xj
-        % for j = (i+1):length(xj_1)
-        %     sumxj = sumxj + aij(j)*xj_1(j);
-        % end 
-        sumxj = sum(aij*xj_1, (i+1):length(xj_1));
+        for j = (i+1):length(xj_1)
+            sumxj = sumxj + A(i,j)*xj_1(j);
+        end 
+        %sumxj = sum(aij*xj_1, (i+1):length(xj_1));
         % Apply the element based formula 
-        xj(i) = (bi - sumxj1 - sumxj) / aii;
+        xj(i) = (B(i) - sumxj1 - sumxj) / A(i,i);
         % SOR update
-        xj(i) = (1-omega)*xj_1(i) + omega * xj(i);
-            
+        xj(i) = (1-omega)*xj_1(i) + omega * xj(i);       
     end
     % Check for convergance 
     if max(abs(xj - xj_1)) < tol

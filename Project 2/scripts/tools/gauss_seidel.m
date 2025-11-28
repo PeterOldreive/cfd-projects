@@ -78,13 +78,17 @@ for iter = 1:maxIterations % Iterate until maximum number has been reached
         sumxj1 = 0;
         % Sum aij, xj(k+1)
         for j = 1:(i - 1)
+            if (aij(j) ~= 0)
             sumxj1 = sumxj1 + aij(j)*xj(j);
+            end
         end 
 
         sumxj = 0; 
         % Sum aij, xj
         for j = (i+1):length(xj_1)
+            if(aij(j) ~= 0)
             sumxj = sumxj + aij(j)*xj_1(j);
+            end 
         end 
 
         % Apply the element based formula 
