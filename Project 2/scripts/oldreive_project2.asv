@@ -191,12 +191,12 @@ for iter = 1:maxIterations % Iterate until maximum number has been reached
         %     sumxj1 = sumxj1 + aij(j)*xj(j);
         % end 
         sumxj1 = sum(aij*xj,1:(i-1));
-        %sumxj = 0; 
+        sumxj = 0; 
         % Sum aij, xj
         % for j = (i+1):length(xj_1)
         %     sumxj = sumxj + aij(j)*xj_1(j);
         % end 
-        sumxj = sum(aij*xj_1, (i+1):length(xj_1));
+        sumxj = sum(aij*xj_1, i+1:length(xj_1));
         % Apply the element based formula 
         xj(i) = (bi - sumxj1 - sumxj) / aii;
         % SOR update
