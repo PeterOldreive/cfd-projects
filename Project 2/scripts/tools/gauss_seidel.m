@@ -9,10 +9,10 @@
 % Updated: 2025-11-24
 %% Convergance specific parameters 
 omega          = 1.95;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
-tol            = 1e-6;    % convergence tolerance 
+tol            = 1;    % convergence tolerance 
 maxIterations = 5000; % Maximum number of iterations before forcing 
                        % convergance of the algorithm
-guess = 300; % First guess of solution vector values 
+guess = 1000; % First guess of solution vector values 
 
 %% Define function for the element wise Gauss-Siedel Formula
 function xik1 = element_based(xj_1, xj, aij, bi, aii, index)
@@ -38,11 +38,14 @@ end
 
 %% Import .csv Files from External Script 
 
-% Import matrx of coefficents
-coeffMatrix = readmatrix('coeff_matrix.csv');
-% Import vector of knowns
-knownVector = readmatrix('knowns.csv');
-
+% % Import matrx of coefficents
+% coeffMatrix = readmatrix('coeff_matrix.csv');
+% % Import vector of knowns
+% knownVector = readmatrix('knowns.csv');
+%% Take Matricies Directly from workspace
+coeffMatrix = A; 
+knownVector = B;
+%% Checks
 % Check that vector has the same mumber of elements as rows in the 
 % coefficent matrix. If these are not compatible a warning will be given
 if (length(coeffMatrix(:,1)) ~= length(knownVector)) | ...
@@ -62,7 +65,7 @@ xj = guess * ones(coeffDim(1),1);
 %% Run iteritve Gauss-Seidel Method 
 for iter = 1:maxIterations % Iterate until maximum number has been reached
     xj_1 = xj; 
-    % disp(iter)
+    disp(iter)
     for i = 1:coeffDim(1) % Loop for number of rows in coeff matrix
         aii = coeffMatrix(i, i); % Coefficent aii lies along the main 
                                  % diagonal of the matrix of coefficents 
@@ -71,8 +74,21 @@ for iter = 1:maxIterations % Iterate until maximum number has been reached
         bi = knownVector(i);   % Pull appropriate known value from vector 
         
         % Call function to impliment elementwise formula 
-        xj(i) = element_based(xj_1, xj, aij, bi, aii, i); 
+        %xj(i) = element_based(xj_1, xj, aij, bi, aii, i); 
+        sumxj1 = 0;
+        % Sum aij, xj(k+1)
+        for j = 1:(i - 1)
+            sumxj1 = sumxj1 + aij(j)*xj(j);
+        end 
 
+        sumxj = 0; 
+        % Sum aij, xj
+        for j = (i+1):length(xj_1)
+            sumxj = sumxj + aij(j)*xj_1(j);
+        end 
+
+        % Apply the element based formula 
+        xj(i) = (bi - sumxj1 - sumxj) / aii;
         % SOR update
         xj(i) = (1-omega)*xj_1(i) + omega * xj(i);
             
@@ -86,8 +102,8 @@ for iter = 1:maxIterations % Iterate until maximum number has been reached
     end
 end
 
-%% Output results 
-% Save solution vector to a .csv file
-writematrix(xj, 'solution_vector.csv');
+% %% Output results 
+% % Save solution vector to a .csv file
+% writematrix(xj, 'solution_vector.csv');
 
 return; 

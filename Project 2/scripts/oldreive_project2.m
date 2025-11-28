@@ -62,8 +62,8 @@ Ny = ydim/deltay; % Number of cells in y-dimension
 Ntot = Nx*Ny; % Total Number of cells 
 
 % Display Grid information to user 
-fprintf(['For deltax = ', num2str(deltax), ' mm and deltay = ', num2str(deltay), ...
-    ' mm\nNx = ', num2str(Nx), ' and Ny = ', num2str(Ny), '\nNtot = ', num2str(Ntot), '\n'])
+fprintf(['For deltax = ', num2str(deltax), ' m and deltay = ', num2str(deltay), ...
+    ' m\nNx = ', num2str(Nx), ' and Ny = ', num2str(Ny), '\nNtot = ', num2str(Ntot), '\n'])
 
 %% Define matrix and vectors
 
@@ -149,29 +149,23 @@ end
 
 %% Call Solver Script 
 
-writematrix(A, "tools/coeff_matrix.csv"); % Write Matrix of Coefficients (A) 
-                                          % to a .csv file
-writematrix(B, 'tools/knowns.csv'); % Write vector of knowns (B) to a .csv file
+% writematrix(A, "tools/coeff_matrix.csv"); % Write Matrix of Coefficients (A) 
+%                                           % to a .csv file
+% writematrix(B, 'tools/knowns.csv'); % Write vector of knowns (B) to a .csv file
 
 % Run solver script saved one directory below within the tools folder.
 % changing directory may be required to run script on a different PC
 run('tools/gauss_seidel.m');
 
 % Read in solution vector gererated by gauss seidel mechanism 
-T = readmatrix('tools/solution_vector.csv'); 
+% T = readmatrix('tools/solution_vector.csv'); 
+
+% Take T from workspace 
+T = xj; 
 
 %Record compute time
 endtime = toc; 
 fprintf("Compute time: %d s\n", round(endtime)) % Print compute time
-
-
-
-
-
-%% Test solution
-T2 = A \ B; 
-Test = abs(T2 - T); 
-fprintf('%d \n', max(Test))
 
 %% Post Process 
 
@@ -245,7 +239,7 @@ end
 
 % Show discretized 2D grid of Nx x Ny points
 figure;
-plot(X, Y, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',3)
+plot(X, Y, 'o', 'LineWidth', 2, 'color', 'r', 'MarkerSize',1)
 set(gca,'YDir','normal'); % make y increase upward visually
 axis equal tight;
 xlim([0 xdim])
@@ -329,3 +323,6 @@ ylabel('Temperature (K)');
 xlabel('x-Coordinate (mm)');
 title('Temperature Along Diagonal Cutline (Bottom Left to Top Right)');
 grid on;
+%%
+disp(['Maximum T = ' num2str(max(T)) 'K'])
+disp(['Minimum T = ' num2str(min(T)) 'K'])
