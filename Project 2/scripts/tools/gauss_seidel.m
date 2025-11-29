@@ -8,40 +8,18 @@
 % Created: 2025-11-24
 % Updated: 2025-11-24
 %% Convergance specific parameters 
-omega          = 1.95;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
-tol            = 1;    % convergence tolerance 
-maxIterations = 5000; % Maximum number of iterations before forcing 
+omega          = 1.97;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
+tol            = 0.001;    % convergence tolerance 
+maxIterations = 20000; % Maximum number of iterations before forcing 
                        % convergance of the algorithm
-guess = 1000; % First guess of solution vector values 
-
-%% Define function for the element wise Gauss-Siedel Formula
-function xik1 = element_based(xj_1, xj, aij, bi, aii, index)
-    % This function solves the element based equation for the Gauss-Seidel
-    % method fof element xi(k+1), using xj(k+1), xj, aij, bi
-    % Find sums of aijxj(k+1) and aijxj(k)
-    
-    sumxj1 = 0;
-    % Sum aij, xj(k+1)
-    for i = 1:(index - 1)
-        sumxj1 = sumxj1 + aij(i)*xj(i);
-    end 
-
-    sumxj = 0; 
-    % Sum aij, xj
-    for i = (index+1):length(xj_1)
-        sumxj = sumxj + aij(i)*xj_1(i);
-    end 
-
-    % Apply the element based formula 
-    xik1 = (bi - sumxj1 - sumxj) / aii;
-end
+guess = 800; % First guess of solution vector values 
 
 %% Import .csv Files from External Script 
 
 % % Import matrx of coefficents
-% coeffMatrix = readmatrix('coeff_matrix.csv');
+% A = readmatrix('coeff_matrix.csv');
 % % Import vector of knowns
-% knownVector = readmatrix('knowns.csv');
+% B = readmatrix('knowns.csv');
 %% Take Matricies Directly from workspace
 coeffMatrix = A; 
 knownVector = B;
@@ -63,47 +41,41 @@ coeffDim = size(coeffMatrix); % Save dimensions of coefficent matrix
 xj = guess * ones(coeffDim(1),1); 
 
 %% Run iteritve Gauss-Seidel Method 
-for iter = 1:maxIterations % Iterate until maximum number has been reached
+for iter = 1:maxIterations
     xj_1 = xj; 
-    disp(iter)
-    for i = 1:coeffDim(1) % Loop for number of rows in coeff matrix
-        aii = coeffMatrix(i, i); % Coefficent aii lies along the main 
-                                 % diagonal of the matrix of coefficents 
-        aij = coeffMatrix(i, :); % all coefficents for the row i in the 
-                                 % matrix of coefficents
-        bi = knownVector(i);   % Pull appropriate known value from vector 
-        
-        % Call function to impliment elementwise formula 
-        %xj(i) = element_based(xj_1, xj, aij, bi, aii, i); 
-        sumxj1 = 0;
-        % Sum aij, xj(k+1)
-        for j = 1:(i - 1)
-            if (aij(j) ~= 0)
-            sumxj1 = sumxj1 + aij(j)*xj(j);
+    for i = 1:Ny
+        index = (i-1)*Nx + 1;
+        for j = 1:Nx
+            term_E = 0;
+            if(j < Nx)
+                term_E = xj_1(index+1)*A(index, index + 1); 
             end
+            term_W = 0;
+            if(j > 1)
+                term_W = xj(index-1)*A(index, index - 1); 
+            end
+            term_N = 0;
+            if(i < Ny)
+                term_N = xj_1(index+Nx)*A(index, index + Nx);
+            end
+            term_S = 0;
+            if(i > 1)
+                term_S = xj(index-Nx)*A(index, index - Nx);
+            end
+        
+            xj(index) = (B(index) - term_N - term_S - term_E - term_W)/A(index,index);
+            xj(index)= (omega)*xj(index) + (1-omega)*xj_1(index);
+            index = index + 1; 
         end 
-
-        sumxj = 0; 
-        % Sum aij, xj
-        for j = (i+1):length(xj_1)
-            if(aij(j) ~= 0)
-            sumxj = sumxj + aij(j)*xj_1(j);
-            end 
+    end 
+          % Check for convergance 
+        if max(abs(xj - xj_1)) < tol
+            % If the maximum absulte difference between all new and old
+            % vaules is less than the tolarance, break out of the loop. 
+            %fprintf('Converged after %d iterations.\n', iter);
+            disp(['Converged in: ' num2str(iter) ' Iterations'])
+            break; % Exit the loop if converged
         end 
-
-        % Apply the element based formula 
-        xj(i) = (bi - sumxj1 - sumxj) / aii;
-        % SOR update
-        xj(i) = (1-omega)*xj_1(i) + omega * xj(i);
-            
-    end
-    % Check for convergance 
-    if max(abs(xj - xj_1)) < tol
-        % If the maximum absulte difference between all new and old
-        % vaules is less than the tolarance, break out of the loop. 
-        fprintf('Converged after %d iterations.\n', iter);
-        break; % Exit the loop if converged
-    end
 end
 
 % %% Output results 

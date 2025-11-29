@@ -1,11 +1,11 @@
-clear all; close all; clc; tic;
+clear all; close all; clc; 
 %% 
 % Peter Oldreive
 % B00894035
 % MECH 4865 - CFD
 % Project 2
 % Created: Nov 24, 2025
-% Updated: Nov 26, 2025
+% Updated: Nov 28, 2025
 % 
 % This program calculates the steady state temperature field of a 2D plane 
 % subject to known boundary conditions. This is to statify the requirements 
@@ -23,7 +23,7 @@ ydim = 0.400; % y-deimension of plate (m)
 T_top = 0; % Top Dirichlet condition (K)
 T_bottom = 0; % Bottom Dirichlet condition (K)
 T_right = 0; % Right Dirichlet condition (K)
-T_left = 0;        % Left Dirichlet condtition (K)
+T_left = 0;  % Left Dirichlet condtition (K)
 
 % Neumann conditions
 % West Wall
@@ -64,11 +64,11 @@ Ntot = Nx*Ny; % Total Number of cells
 % Display Grid information to user 
 fprintf(['For deltax = ', num2str(deltax), ' m and deltay = ', num2str(deltay), ...
     ' m\nNx = ', num2str(Nx), ' and Ny = ', num2str(Ny), '\nNtot = ', num2str(Ntot), '\n'])
+tic; % Mark Start time 
 
 %% Define matrix and vectors
 
 A = zeros(Ntot, Ntot); % Matrix of coefficents
-T = zeros(Ntot, 1); % Vector of unknowns 
 B = zeros(Ntot, 1); % Vector of knowns
 
 %% Fill matrix of coefficents and vector of knowns
@@ -90,60 +90,60 @@ for i = 1:Ntot % For all points
 j = fix((i-1)/Nx) + 1; % Calculate the row number
   % Corner points 
     if(i == 1) % Bottom left corner
-       A(i, i) = -(xy + yx); % Cell
-       A(i, i+1) = yx; % East Cell
-       A(i, i+Nx) = xy; % North cell 
+       A(i, i) = (xy + yx); % Cell
+       A(i, i+1) = -yx; % East Cell
+       A(i, i+Nx) = -xy; % North cell 
     elseif(i == Nx) % Bottom right corner
-       A(i, i) = -((2+anfs/apfs)*xy + yx); % Cell
-       A(i, i-1) = yx; % West Cell
-       A(i, i+Nx) = xy; % North Cell
-       B(i) = -xy*bpfs/apfs; % Known
+       A(i, i) = ((2+anfs/apfs)*xy + yx); % Cell
+       A(i, i-1) = -yx; % West Cell
+       A(i, i+Nx) = -xy; % North Cell
+       B(i) = xy*bpfs/apfs; % Known
     elseif(i == Ntot - Nx + 1) % Top Left
-        A(i, i) = -((2+asfn/apfs)*xy + yx); % Cell
-        A(i, i+1) = yx; % East Cell
-        A(i, i-Nx) = xy; % South Cell
-        B(i) = -xy*bpfn/apfn; % Known
+        A(i, i) = ((2+asfn/apfs)*xy + yx); % Cell
+        A(i, i+1) = -yx; % East Cell
+        A(i, i-Nx) = -xy; % South Cell
+        B(i) = xy*bpfn/apfn; % Known
     elseif(i == Ntot) % Top right
-        A(i, i) = -((2+asfn/apfn)*xy + yx); % Point
-        A(i, i-1) = yx; % West point
-        A(i, i-Nx) = xy; % South Point
-        B(i) = -xy*bpfn/apfn; % Known
+        A(i, i) = ((2+asfn/apfn)*xy + yx); % Point
+        A(i, i-1) = -yx; % West point
+        A(i, i-Nx) = -xy; % South Point
+        B(i) = xy*bpfn/apfn; % Known
     % Boundary Nodes
     elseif(j == 1 && i*deltax < xdim/2 && i > 1) % Left Lower boundary
-        A(i, i) = -(2*yx+xy); % Point
-        A(i, i+1) = yx; % East point
-        A(i, i-1) = xy; % West point
-        A(i, i+Nx) = xy; % North point
+        A(i, i) = (2*yx+xy); % Point
+        A(i, i+1) = -yx; % East point
+        A(i, i-1) = -yx; % West point
+        A(i, i+Nx) = -xy; % North point
     elseif(j == 1 && i*deltax >= xdim/2 && i < Nx) %Right lower boundary
         % Right lower boundary contains node at transition point
         %from Neumann condition to Newton/Robin Condition. 
-        A(i, i) = -((2+anfs/apfs)*xy + 2*yx); % Point
-        A(i, i+1) = yx; % East point
-        A(i, i-1) = yx; % West point
-        A(i, i+Nx) = xy; % North point
-        B(i) = -xy*bpfs/apfs; % Known
+        A(i, i) = ((2+anfs/apfs)*xy + 2*yx); % Point
+        A(i, i+1) = -yx; % East point
+        A(i, i-1) = -yx; % West point
+        A(i, i+Nx) = -xy; % North point
+        B(i) = xy*bpfs/apfs; % Known
     elseif(j > 1 && mod(i, Nx) == 1 && j<Ny) % Left boundary
-        A(i, i) = -(2*xy + yx); % Point
-        A(i, i+1) = yx; % East point
-        A(i, i+Nx) = xy; % North point
-        A(i, i-Nx) = xy; % South point
+        A(i, i) = (2*xy + yx); % Point
+        A(i, i+1) = -yx; % East point
+        A(i, i+Nx) = -xy; % North point
+        A(i, i-Nx) = -xy; % South point
     elseif(j > 1 && mod(i, Nx) == 0 && j < Ny) % Right boundary
-        A(i, i) = -(2*xy + yx); % Point
-        A(i, i-1) = yx; % West point
-        A(i, i+Nx) = xy; % North point
-        A(i, i-Nx) = xy; % South point
+        A(i, i) = (2*xy + yx); % Point
+        A(i, i-1) = -yx; % West point
+        A(i, i+Nx) = -xy; % North point
+        A(i, i-Nx) = -xy; % South point
     elseif(j == Ny && i > Nx*(j-1) + 1 && i < Nx*j) % Top 
-        A(i, i) = -((2+asfn/apfn)*xy + 2*yx); % Point
-        A(i, i-1) = yx; % West point
-        A(i, i+1) = yx; % East point
-        A(i, i-Nx) = xy; % South point
-        B(i) = -xy*bpfn/apfn; % Known
+        A(i, i) = ((2+asfn/apfn)*xy + 2*yx); % Point
+        A(i, i-1) = -yx; % West point
+        A(i, i+1) = -yx; % East point
+        A(i, i-Nx) = -xy; % South point
+        B(i) = xy*bpfn/apfn; % Known
     else % Interior nodes
-        A(i, i) = -2*(xy+yx); % Point
-        A(i, i-1) = yx; % West point
-        A(i, i+1) = yx; % East point
-        A(i, i+Nx) = xy; % North point
-        A(i, i-Nx) = xy; % South point
+        A(i, i) = 2*(xy+yx); % Point
+        A(i, i-1) = -yx; % West point
+        A(i, i+1) = -yx; % East point
+        A(i, i+Nx) = -xy; % North point
+        A(i, i-Nx) = -xy; % South point
     end
 end
 
@@ -155,67 +155,16 @@ end
 
 % Run solver script saved one directory below within the tools folder.
 % changing directory may be required to run script on a different PC
-% run('tools\gauss_seidel.m');
+run('tools/gauss_seidel.m');
 
 % Read in solution vector gererated by gauss seidel mechanism 
 % T = readmatrix('tools/solution_vector.csv'); 
-
-%% Convergance specific parameters 
-omega          = 1.95;     % relaxation factor (ω = 1 → pure Gauss–Seidel)
-tol            = 1;    % convergence tolerance 
-maxIterations = 5000; % Maximum number of iterations before forcing 
-                       % convergance of the algorithm
-guess = 1000; % First guess of solution vector value
-%% Initialize first Guess of Solution Vector
-% Initialize the guess for temperature values (assume 300 K)
-coeffDim = size(A); % Save dimensions of coefficent matrix
-% Initialize solution vector with 300 K 
-xj = guess * ones(coeffDim(1),1); 
-
-%% Run iteritve Gauss-Seidel Method 
-for iter = 1:maxIterations % Iterate until maximum number has been reached
-    xj_1 = xj; 
-    disp(iter)
-    for i = 1:Ntot % Loop for number of rows in coeff matrix
-        % aii = A(i, i); % Coefficent aii lies along the main 
-        %                          % diagonal of the matrix of coefficents 
-        % aij = A(i, :); % all coefficents for the row i in the 
-        %                          % matrix of coefficents
-        % bi = B(i);   % Pull appropriate known value from vector 
-        
-        % Call function to impliment elementwise formula 
-        %xj(i) = element_based(xj_1, xj, aij, bi, aii, i); 
-        sumxj1 = 0;
-        %Sum aij, xj(k+1)
-        for j = 1:(i - 1)
-            sumxj1 = sumxj1 + A(i,j)*xj(j);
-        end 
-        %sumxj1 = sum(aij*xj,1:(i-1));
-        sumxj = 0; 
-        % Sum aij, xj
-        for j = (i+1):length(xj_1)
-            sumxj = sumxj + A(i,j)*xj_1(j);
-        end 
-        %sumxj = sum(aij*xj_1, (i+1):length(xj_1));
-        % Apply the element based formula 
-        xj(i) = (B(i) - sumxj1 - sumxj) / A(i,i);
-        % SOR update
-        xj(i) = (1-omega)*xj_1(i) + omega * xj(i);       
-    end
-    % Check for convergance 
-    if max(abs(xj - xj_1)) < tol
-        % If the maximum absulte difference between all new and old
-        % vaules is less than the tolarance, break out of the loop. 
-        fprintf('Converged after %d iterations.\n', iter);
-        break; % Exit the loop if converged
-    end
-end
 % Take T from workspace 
 T = xj; 
 
 %Record compute time
 endtime = toc; 
-fprintf("Compute time: %d s\n", round(endtime)) % Print compute time
+disp(['Compute time:' num2str(round(endtime, 2)) 's']) % Print compute time
 
 %% Post Process 
 
@@ -266,24 +215,58 @@ T_top_values = T_plot(Ny, :); % Top boundary
 T_left_values = T_plot(:,1); % 1st column is left boundary
 T_x_200 = T_plot(:, fix(0.200/deltax)); % Temperatures at 100 mm right of the
                                       % left boundary
-T_x_400 = T_plot(:, fix(0.400/deltay)); % temperatures at 200 mm right of the 
+T_x_400 = T_plot(:, fix(0.400/deltax)); % temperatures at 200 mm right of the 
                                       % left boundary
-T_x_600 = T_plot(:, fix(0.600/deltay)); % Temperatures at 300 mm right of the 
+T_x_600 = T_plot(:, fix(0.600/deltax)); % Temperatures at 300 mm right of the 
                                       % left boundary
 T_right_values = T_plot(:, Nx); % Right boundary temperatues
 
 % Find diagonal vector
-rowcount = 1; % Start in 1st row
-T_diag = zeros(Nx/2, 1); % Define diagonal vector
-for columncount = 2:Nx % count up to Nx
-   
-    if (mod(columncount, 2) == 0 && rowcount < Ny+2) % count up rows until max
-        T_diag(rowcount, 1) = T_plot(rowcount, columncount); % index diagonals out of matrix
-        rowcount = rowcount + 1; % Count up row     
+if Nx == Ny
+    T_diag = zeros(Nx, 1); 
+    for i = 1:Nx
+      T_diag(i) = T_plot(i, i);
     end
-
-  
+else
+    rowcount = 1; % Start in 1st row
+    T_diag = zeros(Nx/2, 1); % Define diagonal vector
+    for columncount = 2:Nx % count up to Nx
+        if (mod(columncount, 2) == 0 && rowcount < Ny+2) % count up rows until max
+            T_diag(rowcount, 1) = T_plot(rowcount, columncount); % index diagonals out of matrix
+            rowcount = rowcount + 1; % Count up row     
+        end  
+    end 
 end 
+ 
+% Find heat transfer rate at north boundary 
+Tfn = zeros(Nx, 1); % Define ficticious north temperature
+Tnw = zeros(Nx, 1); % Define north wall temperature
+qn = zeros(Nx, 1); % Define heat transfer per unit thickenss
+% For all x 
+for i = 1:Nx
+    Tfn(i) = (-asfn*T_plot(Ny, i) + bpfn)/apfn;
+    Tnw(i) = (T_plot(Ny, i) + Tfn(i))/2;
+    qn(i) = - h_north*deltax*(Tnw(i) - T_inf_north);
+end 
+
+% Find heat transfer rate at south boundary 
+Tfs = zeros(Nx, 1); % Define ficticious south temperature
+Tsw = zeros(Nx, 1); % Define south wall temperature
+qs = zeros(Nx, 1); % Define heat transfer per unit thickenss
+% For all x 
+for i = 1:Nx
+    if i < 0.4/deltax
+        % No HT through insulation
+    else
+        Tfs(i) = (bpfs - anfs*T_plot(1, i))/apfs;
+        Tsw(i) = (T_plot(1, i) + Tfs(i))/2;
+        qs(i) = - h_south*deltax*(Tsw(i) - T_inf_south);
+    end
+end 
+
+% Find total q
+QN = sum(qn, 'all'); % North Wall heat transfer per unit thickness (W/m)
+QS = sum(qs, 'all'); % South Wall heat transfer per unit thickenss (W/m)
 
 %% Plotting
 
@@ -303,7 +286,8 @@ figure('Name', '2D Colour Map','NumberTitle','off');
 hold on
 contourf(T_plot,500:20:1800,'LineColor', "none"); % Add Contour Lines every 10 K
 set(gca,'YDir','normal');
-axis equal tight;
+axis tight;
+pbaspect([2 1 1])
 a=colorbar;
 a.Label.String = 'Temperature, T (K)';
 a.Limits = [500 1800];
@@ -366,13 +350,34 @@ grid on;
 
 % Diagonal Temperature 
 figure(); 
+if(length(T_diag) == Nx)
+    plot(deltax:deltax:xdim, T_diag, 'o', 'MarkerSize', 5, 'color', 'r', ...
+    'LineStyle','--');
+else
 plot(deltax:2*deltax:xdim, T_diag, 'o', 'MarkerSize', 5, 'color', 'r', ...
     'LineStyle','--');
+end
 hold on;
 ylabel('Temperature (K)');
 xlabel('x-Coordinate (mm)');
 title('Temperature Along Diagonal Cutline (Bottom Left to Top Right)');
 grid on;
-%%
+
+
+% Heat Transfer Plot 
+figure(); 
+plot(deltax:deltax:xdim, qn, 'o', 'MarkerSize', 5, 'color', 'r', ...
+    'LineStyle','--');
+hold on;
+plot((deltax):deltax:xdim, abs(qs), 'o', 'MarkerSize', 5, 'color', 'b', ...
+    'LineStyle','--');
+ylabel('Heat Transfer Rate (W/m)');
+xlabel('x-Coordinate (m)');
+title('Heat Transfer Rate Along Fluid Flow Boundaries');
+grid on;
+
+%% Display Key Values
 disp(['Maximum T = ' num2str(max(T)) 'K'])
 disp(['Minimum T = ' num2str(min(T)) 'K'])
+disp(['North Wall Heat Transfer = ' num2str(round(QN/1000, 1)) ' kW/m'])
+disp(['South Wall Heat Transfer = ' num2str(round(QS/1000, 1)) ' kW/m'])
