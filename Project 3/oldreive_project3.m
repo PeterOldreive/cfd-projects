@@ -311,9 +311,60 @@ title('t = 3 s');
 grid on;
 xlabel('x-Coordinate (m)');
 ylabel('Displacement (m)');
-
-
 % Add legend to plot
 h = [p1 p2 p3 p4];
 lg = legend(h, {'C = 0.25','C = 0.5','C = 0.75','C = 1'},'Orientation', 'Horizontal');
 lg.Layout.Tile = 'south';
+
+
+%% Position dependant boundary condition 
+figure('Name','x-Dimension BC','NumberTitle','off');
+% C = 0.25
+plot(x, U(:,1, 0.25/Cstep), 'o', 'MarkerSize', 4, 'color', 'g', ...
+        'LineStyle','--');
+hold on;
+% C = 0.50
+plot( x, U(:,1, 0.50/Cstep), '*', 'MarkerSize', 4, 'color', 'b', ...
+        'LineStyle','--');
+hold on;
+% C = 0.75
+plot( x, U(:, 1, 0.75/Cstep), '.', 'MarkerSize', 4, 'color', 'c', ...
+        'LineStyle','--');
+hold on;
+% c = 1
+plot( x, U(:, 1, 1/Cstep), '+', 'MarkerSize', 4, 'color', 'r', ...
+        'LineStyle','--');
+hold on;
+title('Position Dependant Boundary Condition for x-Domain');
+grid on;
+xlabel('x-Coordinate (m)');
+ylabel('Displacement (m)');
+ylim([-1 1])
+legend('C = 0.25','C = 0.5','C = 0.75','C = 1', 'Location', 'southoutside', ...
+    'Orientation', 'horizontal')
+
+%% Time Dependant BC
+figure('Name','Time Dep. BC.','NumberTitle','off');
+% C = 0.25
+plot( t, U(1,:, 0.25/Cstep), 'o', 'MarkerSize', 4, 'color', 'g', ...
+        'LineStyle','--');
+hold on;
+% C = 0.50
+plot( t, U(1,:, 0.50/Cstep), '*', 'MarkerSize', 4, 'color', 'b', ...
+        'LineStyle','--');
+hold on;
+% C = 0.75
+plot( t, U(1, :, 0.75/Cstep), '.', 'MarkerSize', 4, 'color', 'c', ...
+        'LineStyle','--');
+hold on;
+% c = 1
+plot( t, U(1, :, 1/Cstep), '+', 'MarkerSize', 4, 'color', 'r', ...
+        'LineStyle','--');
+hold on;
+title('Time Dependant Boundary Condition for t0.01-Domain');
+legend('C = 0.25','C = 0.5','C = 0.75','C = 1', 'Location', 'southoutside', ...
+    'Orientation', 'horizontal');
+grid on;
+xlabel('Time (s)');
+ylabel('Displacement (m)');
+ylim([-1 1])
