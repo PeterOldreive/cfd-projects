@@ -111,23 +111,6 @@ for C = Cmin:Cstep:Cmax
     view(-45,45);
 end 
 
-%% Contour Plot
-for C = Cmin:Cstep:Cmax
-    % Surface Plot
-    figure('Name',['Surface Plot C ' num2str(C)],'NumberTitle','off')
-    contourf(U(:, :, C/Cstep),'EdgeColor','none')
-    %set(gcf, 'Position', [350 250 800 400])
-    xlabel('Time');
-    ylabel('x-Position (m)');
-    title('Wave Propogation (Colourmap)');
-    a=colorbar;
-    a.Label.String = 'Amplitude';
-    yticks(0:0.1/deltax:xdim/deltax)
-    yticklabels(x(1):0.1:xdim);
-    xticks(t(1)/deltat:1/deltat:tmax/deltat)
-    xticklabels(t(1):1:tmax);
-end 
-
 %% Wave Ampltidue WTR time
 figure('Name','Time Plots','NumberTitle','off');
 xt = tiledlayout(2,2); % 2 rows, 2 columns
@@ -394,7 +377,7 @@ figure('Name','x-Dimension Plots','NumberTitle','off');
 xp = tiledlayout(2,2); % 2 rows, 2 columns
 xp.TileSpacing = 'compact';
 xp.Padding = 'compact';
-title(xp, 'Oscillating Displacement WRT x-Coordinate for Various C for Timestamps < 1')
+title(xp, 'Oscillating Displacement WRT x-Coordinate for Various C and ')
 nexttile;
 % C = 0.25
 p1 = plot( x, U(:,0.25/deltat, 0.25/Cstep), 'o', 'MarkerSize', 4, 'color', 'g', ...
